@@ -1,0 +1,56 @@
+---
+version: '2'
+services:
+
+  flog-db:
+    image: docker.sunet.se/library/postgres-9.6:latest
+    networks:
+      dev:
+    expose:
+      - 5432
+    volumes:
+      - ../data/postgres:/var/lib/postgresql
+      - ../postgres/docker-entrypoint-initdb.d/init_flog_user.sh:/docker-entrypoint-initdb.d/init_flog_user.sh
+    environment:
+      - POSTGRES_PASSWORD=docker
+
+  flog-app:
+    image: docker.sunet.se/flog/flog_app:latest
+    networks:
+      dev:
+    expose:
+      - 8000
+    volumes:
+      - ../flog/etc/dotenv:/opt/flog/.env
+      - ../data/flog/institution.xml:/opt/flog/institution.xml
+      - ../data/flog/static:/opt/flog/flog/static
+    depends_on:
+      - flog-db
+
+  memcached:
+    image: docker.sunet.se/library/memcached:latest
+    networks:
+      dev:
+
+  flog-nginx:
+    image: docker.sunet.se/eduid/nginx:latest
+    networks:
+      dev:
+        ipv4_address: 172.16.27.100
+    expose:
+      - 80
+    volumes:
+      - ../nginx/etc/flog.conf:/etc/nginx/sites-enabled/default:ro
+      - ../data/flog/static:/var/www/static:ro
+    depends_on:
+      - flog-app
+
+networks:
+  dev:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.27.0/24
+        gateway: 172.16.27.1
+
