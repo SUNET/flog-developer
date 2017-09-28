@@ -6,24 +6,31 @@ services:
     image: docker.sunet.se/library/postgres-9.6:latest
     networks:
       dev:
+        ipv4_address: 172.16.27.200
     expose:
       - 5432
     volumes:
-      - ../data/postgres:/var/lib/postgresql
+      - ../data/postgresql/data:/var/lib/postgresql/data
+      - ../data/postgresql/backup:/var/lib/postgresql/backup
       - ../postgres/docker-entrypoint-initdb.d/init_flog_user.sh:/docker-entrypoint-initdb.d/init_flog_user.sh
     environment:
       - POSTGRES_PASSWORD=docker
 
   flog-app:
-    image: docker.sunet.se/flog/flog_app:latest
+    #image: docker.sunet.se/flog/flog_app:latest
+    image: local/flog:latest
     networks:
       dev:
     expose:
       - 8000
     volumes:
       - ../flog/etc/dotenv:/opt/flog/.env
+      - ../flog/logs:/opt/flog/logs
       - ../data/flog/institution.xml:/opt/flog/institution.xml
       - ../data/flog/static:/opt/flog/flog/static
+    environment:
+      - workers=2
+      - worker_threads=2
     depends_on:
       - flog-db
 
@@ -31,6 +38,7 @@ services:
     image: docker.sunet.se/library/memcached:latest
     networks:
       dev:
+        ipv4_address: 172.16.27.150
 
   flog-nginx:
     image: docker.sunet.se/eduid/nginx:latest

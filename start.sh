@@ -8,7 +8,9 @@ fi
 #
 # Set up entrys in /etc/hosts for the containers with externally accessible services
 #
-(printf "172.16.27.100\tnginx.flog_dev nginx.flog.docker\n";
+(printf "172.16.27.100\tnginx.flog_dev nginx.flog.docker\n
+         172.16.27.150\tmemcached.flog_dev memcached.flog.docker\n;
+         172.16.27.200\tdb.flog_dev db.flog.docker\n";
 ) \
     | while read line; do
     if ! grep -q "^${line}$" /etc/hosts; then
