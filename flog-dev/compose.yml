@@ -28,9 +28,14 @@ services:
       - ../flog/logs:/opt/flog/logs
       - ../data/flog/institution.xml:/opt/flog/institution.xml
       - ../data/flog/static:/opt/flog/flog/static
+      - ../sources/flog:/opt/src/flog
     environment:
-      - workers=2
-      - worker_threads=2
+      - "DB_HOST=flog-db"
+      - "ALLOWED_HOSTS=flog-app"
+      - "PYTHONPATH=/opt/src/flog"
+      - "base_dir=/opt/src/flog"
+      - "workers=2"
+      - "worker_threads=2"
     depends_on:
       - flog-db
 
